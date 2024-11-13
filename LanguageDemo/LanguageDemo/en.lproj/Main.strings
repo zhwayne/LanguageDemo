@@ -1,0 +1,18 @@
+
+/* Class = "UISegmentedControl"; 3vS-eY-jNk.segmentTitles[0] = "en"; ObjectID = "3vS-eY-jNk"; */
+"3vS-eY-jNk.segmentTitles[0]" = "en";
+
+/* Class = "UISegmentedControl"; 3vS-eY-jNk.segmentTitles[1] = "zh-Hans"; ObjectID = "3vS-eY-jNk"; */
+"3vS-eY-jNk.segmentTitles[1]" = "zh-Hans";
+
+/* Class = "UISegmentedControl"; 3vS-eY-jNk.segmentTitles[2] = "ja"; ObjectID = "3vS-eY-jNk"; */
+"3vS-eY-jNk.segmentTitles[2]" = "ja";
+
+/* Class = "UILabel"; text = "Label"; ObjectID = "hGJ-CR-kX7"; */
+"hGJ-CR-kX7.text" = "Label";
+
+/* Class = "UIButton"; configuration.title = "download"; ObjectID = "ugg-xp-hmg"; */
+"ugg-xp-hmg.configuration.title" = "download";
+
+/* Class = "UIButton"; normalTitle = "Button"; ObjectID = "ugg-xp-hmg"; */
+"ugg-xp-hmg.normalTitle" = "Button";
