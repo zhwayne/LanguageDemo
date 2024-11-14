@@ -54,7 +54,7 @@ class ViewController: UIViewController {
             do {
                 let manager = LocalizationManager.shared
                 let source = BundleLocalizationSource()
-                try await manager.fetchLocalizationFiles(files, using: source)
+                try await manager.fetchPatchFiles(files, using: source)
                 reloadStrings()
             } catch {
                 print("error: \(error)")
@@ -63,7 +63,7 @@ class ViewController: UIViewController {
     }
     
     @IBAction func onCleanButtonClick(_ sender: UIButton) {
-        LocalizationManager.shared.cleanPatch()
+        LocalizationManager.shared.cleanAllPatchFiles()
         reloadStrings()
     }
 }

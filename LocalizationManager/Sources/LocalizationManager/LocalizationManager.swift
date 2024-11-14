@@ -92,7 +92,7 @@ extension LocalizationManager {
         return documentsPath.appendingPathComponent("Localization")
     }
     
-    public func cleanPatch() {
+    public func cleanAllPatchFiles() {
         let fileManager = FileManager.default
         let basePath = LocalizationManager.shared.basePath
         
@@ -112,7 +112,7 @@ extension LocalizationManager {
 
 extension LocalizationManager {
     
-    public func fetchLocalizationFiles(_ localizationFiles: [LocalizationFile], using localizationSource: some LocalizationSource) async throws {
+    public func fetchPatchFiles(_ localizationFiles: [LocalizationFile], using localizationSource: some LocalizationSource) async throws {
         let downloader = LocalizationDownloader(source: localizationSource)
         try await downloader.fetchLocalizationFiles(localizationFiles)
         
