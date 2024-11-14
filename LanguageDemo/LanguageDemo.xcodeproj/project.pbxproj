@@ -118,7 +118,7 @@
 				};
 			};
 			buildConfigurationList = 0BBA0FA62CE2F4B800BADD5F /* Build configuration list for PBXProject "LanguageDemo" */;
-			developmentRegion = en;
+			developmentRegion = ja;
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,

@@ -7,16 +7,16 @@
 
 import Foundation
 
-public class LocalizationDownloader: @unchecked Sendable {
+final class LocalizationDownloader<Source: LocalizationSource>: @unchecked Sendable {
 
     // MARK: - Properties
 
-    let source: LocalizationSource
+    let source: Source
     let fileManager: FileManager
 
     // MARK: - Initialization
 
-    public init(source: LocalizationSource, fileManager: FileManager = .default) {
+    init(source: Source, fileManager: FileManager = .default) {
         self.source = source
         self.fileManager = fileManager
     }
@@ -25,7 +25,7 @@ public class LocalizationDownloader: @unchecked Sendable {
 
     /// 下载或加载多个本地化文件
     @discardableResult
-    public func fetchLocalizationFiles(_ localizationFiles: [LocalizationFile]) async throws -> [URL] {
+    func fetchLocalizationFiles(_ localizationFiles: [LocalizationFile]) async throws -> [URL] {
         var fetchedURLs: [URL] = []
 
         let basePath = LocalizationManager.shared.basePath
@@ -38,7 +38,12 @@ public class LocalizationDownloader: @unchecked Sendable {
                         try self.fileManager.createDirectory(at: lproj, withIntermediateDirectories: true)
                     }
                     let destination = lproj.appendingPathComponent("\(file.tableName).strings")
-                    try await self.source.fetchLocalizationFile(languageCode: file.languageCode, tableName: file.tableName, to: destination)
+                    try await self.source.fetchLocalizationFile(
+                        languageCode: file.languageCode,
+                        tableName: file.tableName,
+                        from: file.url,
+                        to: destination
+                    )
                     return destination
                 }
             }
@@ -49,18 +54,5 @@ public class LocalizationDownloader: @unchecked Sendable {
         }
 
         return fetchedURLs
-    }
-
-    /// 下载或加载指定语言和表的本地化文件
-    @discardableResult
-    public func fetchLocalizationFile(languageCode: String, tableName: String) async throws -> URL {
-        let basePath = LocalizationManager.shared.basePath
-        let lproj = basePath.appendingPathComponent("\(languageCode).lproj")
-        if !fileManager.fileExists(atPath: lproj.path) {
-            try fileManager.createDirectory(at: lproj, withIntermediateDirectories: true)
-        }
-        let destination = lproj.appendingPathComponent("\(tableName).strings")
-        try await source.fetchLocalizationFile(languageCode: languageCode, tableName: tableName, to: destination)
-        return destination
     }
 }

@@ -3,7 +3,26 @@
 
 import Foundation
 
-@available(iOS 13.0, *)
+private var appDefaultLanguageCode: String {
+    Bundle.main.object(forInfoDictionaryKey: "CFBundleDevelopmentRegion") as? String ?? "en"
+}
+
+private var systemPreferredLanguageCode: String {
+    Bundle.main.preferredLocalizations.first ?? appDefaultLanguageCode
+}
+
+public enum AppLanguage: Hashable, Sendable {
+    case system
+    case custom(String)
+    
+    var languageCode: String {
+        switch self {
+        case .system: return systemPreferredLanguageCode
+        case .custom(let code): return code
+        }
+    }
+}
+
 public class LocalizationManager: @unchecked Sendable {
     
     // MARK: - Singleton
@@ -15,14 +34,20 @@ public class LocalizationManager: @unchecked Sendable {
     private let storage = UserDefaults.standard
     private let userDefaultsKey = "AppLanguage"
     
-    public var defaultLanguage: String = Locale.preferredLanguages.first ?? "en"
+    public var tableNames: Set<String> = ["Localizable"]
     
-    public var currentLanguage: String {
+    public var appLanguage: AppLanguage {
         get {
-            return storage.string(forKey: userDefaultsKey) ?? defaultLanguage
+            if let languageCode = storage.string(forKey: userDefaultsKey), languageCode != "system" {
+                return .custom(languageCode)
+            }
+            return .system
         }
         set {
-            storage.set(newValue, forKey: userDefaultsKey)
+            switch newValue {
+            case .system: storage.set("system", forKey: userDefaultsKey)
+            case .custom(let code): storage.set(code, forKey: userDefaultsKey)
+            }
             storage.synchronize()
             
             // 更新 Bundle.main 的关联语言包
@@ -37,25 +62,26 @@ public class LocalizationManager: @unchecked Sendable {
     private init() {
         CustomBundle.once
         XCStringsBundle.main.setBasePath(basePath.path)
-        currentLanguage = currentLanguage
+        appLanguage = appLanguage
     }
     
     // MARK: - Methods
     
     /// 更新 Bundle.main 的语言包路径
-    private func updateBundlePath(for languageCode: String) {
-        var bundlePath = Bundle.main.path(forResource: languageCode, ofType: "lproj")
-        if bundlePath == nil {
-            // 如果找不到对应的语言包，使用英文
-            bundlePath = Bundle.main.path(forResource: defaultLanguage, ofType: "lproj")
+    private func updateBundlePath(for language: AppLanguage) {
+        switch language {
+        case .system:
+            objc_setAssociatedObject(Bundle.main, &bundleKey, nil, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+        case .custom(let languageCode):
+            if let bundlePath = Bundle.main.path(forResource: languageCode, ofType: "lproj") {
+                let languageBundle = Bundle(path: bundlePath)
+                objc_setAssociatedObject(Bundle.main, &bundleKey, languageBundle, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+            }
         }
-        if bundlePath == nil {
-            return
-        }
-        let languageBundle = Bundle(path: bundlePath!)
-        objc_setAssociatedObject(Bundle.main, &bundleKey, languageBundle, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
         // FIXME: 需要重新加载该语言下的所有 table，这里只先列出 Localizable（和主工程保持一致）
-        try? XCStringsBundle.main.load(table: "Localizable", language: languageCode)
+        tableNames.forEach { table in
+            try? XCStringsBundle.main.load(table: table, language: language.languageCode)
+        }
     }
 }
 
@@ -80,6 +106,22 @@ extension LocalizationManager {
             XCStringsBundle.main.clean()
         } catch {
             print("删除资源文件失败: \(error)")
+        }
+    }
+}
+
+extension LocalizationManager {
+    
+    public func fetchLocalizationFiles(_ localizationFiles: [LocalizationFile], using localizationSource: some LocalizationSource) async throws {
+        let downloader = LocalizationDownloader(source: localizationSource)
+        try await downloader.fetchLocalizationFiles(localizationFiles)
+        
+        // 加载当前语言和表的 .xcstring 文件
+        for file in localizationFiles where file.languageCode == appLanguage.languageCode {
+            if !tableNames.contains(file.tableName) {
+                tableNames.insert(file.tableName)
+            }
+            try XCStringsBundle.main.load(table: file.tableName, language: file.languageCode)
         }
     }
 }

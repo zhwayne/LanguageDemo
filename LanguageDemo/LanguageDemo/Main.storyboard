@@ -24,11 +24,12 @@
                                 <nil key="highlightedColor"/>
                             </label>
                             <segmentedControl opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="top" segmentControlStyle="bordered" selectedSegmentIndex="0" translatesAutoresizingMaskIntoConstraints="NO" id="3vS-eY-jNk">
-                                <rect key="frame" x="89" y="83" width="215" height="32"/>
+                                <rect key="frame" x="53" y="83" width="287" height="32"/>
                                 <segments>
                                     <segment title="en"/>
                                     <segment title="zh-Hans"/>
                                     <segment title="ja"/>
+                                    <segment title="system"/>
                                 </segments>
                                 <connections>
                                     <action selector="onSegmentControlValueChanged:" destination="BYZ-38-t0r" eventType="valueChanged" id="QVX-BE-lqq"/>

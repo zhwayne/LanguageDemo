@@ -11,7 +11,7 @@ import LocalizationManager
 
 class ViewController: UIViewController {
     
-    let items = ["en", "zh-Hans", "ja"]
+    let items: [AppLanguage] = [.custom("en"), .custom("zh-Hans"), .custom("ja"), .system]
 
     @IBOutlet weak var segmentControl: UISegmentedControl!
     @IBOutlet weak var loadPatchButton: UIButton!
@@ -25,22 +25,36 @@ class ViewController: UIViewController {
     }
     
     @IBAction func onSegmentControlValueChanged(_ sender: UISegmentedControl) {
-        LocalizationManager.shared.currentLanguage = items[sender.selectedSegmentIndex]
+        LocalizationManager.shared.appLanguage = items[sender.selectedSegmentIndex]
         reloadStrings()
     }
+    
+    private let files = [
+        LocalizationFile(
+            languageCode: "en",
+            tableName: "Localizable",
+            url: Bundle.main.url(forResource: "Localizable_en", withExtension: "txt")!
+        ),
+        LocalizationFile(
+            languageCode: "zh-Hans",
+            tableName: "Localizable",
+            url: Bundle.main.url(forResource: "Localizable_zh-Hans", withExtension: "txt")!
+        ),
+        LocalizationFile(
+            languageCode: "ja",
+            tableName: "Localizable",
+            url: Bundle.main.url(forResource: "Localizable_ja", withExtension: "txt")!
+        )
+    ]
     
     @IBAction func onDownloadButtonClick(_ sender: UIButton) {
         sender.isEnabled = false
         Task {
             defer { sender.isEnabled = true }
             do {
+                let manager = LocalizationManager.shared
                 let source = BundleLocalizationSource()
-                let downloader = LocalizationDownloader(source: source)
-                try await downloader.fetchLocalizationFiles([
-                    .init(languageCode: "en", url: URL(fileURLWithPath: "")),
-                    .init(languageCode: "zh-Hans", url: URL(fileURLWithPath: "")),
-                    .init(languageCode: "ja", url: URL(fileURLWithPath: ""))
-                ])
+                try await manager.fetchLocalizationFiles(files, using: source)
                 reloadStrings()
             } catch {
                 print("error: \(error)")
@@ -62,7 +76,7 @@ extension ViewController {
         
         label.text = NSLocalizedString("hello_world", comment: "hello world")
     
-        let preferredLanguage = LocalizationManager.shared.currentLanguage
-        segmentControl.selectedSegmentIndex = items.firstIndex(of: preferredLanguage) ?? 0
+        let appLanguage = LocalizationManager.shared.appLanguage
+        segmentControl.selectedSegmentIndex = items.firstIndex(of: appLanguage) ?? 0
     }
 }

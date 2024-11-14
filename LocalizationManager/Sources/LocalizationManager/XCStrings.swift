@@ -114,7 +114,7 @@ class XCStringsBundle: @unchecked Sendable {
     
     /// 获取本地化字符串
     func localizedString(forKey key: String, table tableName: String) -> String? {
-        let currentLanguage = LocalizationManager.shared.currentLanguage
+        let currentLanguage = LocalizationManager.shared.appLanguage.languageCode
         
         // 如果指定表未加载，则尝试加载
         if localizedTables[tableName] == nil {
@@ -137,7 +137,7 @@ class XCStringsBundle: @unchecked Sendable {
 extension XCStringsBundle {
     /// 刷新指定的本地化表
     func refresh(table: String, language: String? = nil) throws {
-        let lang = language ?? LocalizationManager.shared.currentLanguage
+        let lang = language ?? LocalizationManager.shared.appLanguage.languageCode
         try load(table: table, language: lang)
     }
     

@@ -17,7 +17,19 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // Override point for customization after application launch.
         LocalizationManager.configure()
         
+        let supportedLanguages = Bundle.main.localizations
+        print("App 支持的语言：\(supportedLanguages)")
         
+        if let preferredLanguage = Bundle.main.preferredLocalizations.first {
+            print("系统首选语言：\(preferredLanguage)")
+        }
+        
+        if let defaultLanguage = Bundle.main.object(forInfoDictionaryKey: "CFBundleDevelopmentRegion") as? String {
+            print("应用默认语言：\(defaultLanguage)")
+        }
+        
+        let preferredLanguages = Locale.preferredLanguages
+        print("用户首选语言列表：\(preferredLanguages)")
         
         return true
     }

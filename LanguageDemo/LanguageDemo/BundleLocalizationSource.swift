@@ -16,15 +16,17 @@ class BundleLocalizationSource: LocalizationSource {
         self.fileManager = fileManager
     }
     
-    func fetchLocalizationFile(languageCode: String, tableName: String, to destination: URL) async throws {
+    func fetchLocalizationFile(languageCode: String, tableName: String, from source: URL, to destination: URL) async throws {
+        guard source.isFileURL else {
+            fatalError("source must be file url.")
+        }
         if fileManager.fileExists(atPath: destination.path) {
             try fileManager.removeItem(at: destination)
         }
         
         try? await Task.sleep(nanoseconds: 1_000_000_000)
         
-        let bundleFileURL = Bundle.main.url(forResource: "\(tableName)_\(languageCode)", withExtension: "txt")!
-        try fileManager.copyItem(at: bundleFileURL, to: destination)
+        try fileManager.copyItem(at: source, to: destination)
         
         guard fileManager.fileExists(atPath: destination.path) else {
             throw LocalizationError.fileNotFound

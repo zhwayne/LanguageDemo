@@ -18,14 +18,14 @@ class NetworkLocalizationSource: LocalizationSource {
         self.fileManager = fileManager
     }
     
-    func fetchLocalizationFile(languageCode: String, tableName: String, to destination: URL) async throws {
+    func fetchLocalizationFile(languageCode: String, tableName: String, from source: URL, to destination: URL) async throws {
         if fileManager.fileExists(atPath: destination.path) {
             try fileManager.removeItem(at: destination)
         }
         
         // 下载文件
         do {
-            let (tempURL, _) = try await session.download(from: URL(string: "https://example.com/localizations/\(languageCode).lproj\(tableName).strings")!)
+            let (tempURL, _) = try await session.download(from: source)
             // 移动文件到目标路径
             try fileManager.moveItem(at: tempURL, to: destination)
         } catch {
